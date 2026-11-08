@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, DateTime, ForeignKey, JSON, Boolean, Float, Integer, UniqueConstraint
+from sqlalchemy import String, Text, DateTime, ForeignKey, JSON, Boolean, Float, Integer, LargeBinary, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -59,6 +59,7 @@ class UploadedDocument(Identity, Tenant, Base):
     status: Mapped[str] = mapped_column(String(40), default='Pending')
     demo: Mapped[bool] = mapped_column(Boolean, default=False)
     mapping: Mapped[dict] = mapped_column(JSON, default=dict)
+    source_bytes: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True, deferred=True)
 
 
 class RegulatoryFramework(Identity, Tenant, Base):

@@ -1,0 +1,1 @@
+{"framework":"fastapi","buildCommand":"python -m alembic upgrade head","regions":["sin1"]}

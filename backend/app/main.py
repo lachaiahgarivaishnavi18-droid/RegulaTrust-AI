@@ -75,7 +75,7 @@ async def protections(request: Request, call_next):
 
 
 def serialize(model):
-    result = {column.name: getattr(model, column.name) for column in model.__table__.columns}
+    result = {column.name: getattr(model, column.name) for column in model.__table__.columns if column.name != 'source_bytes'}
     for key in ('password_hash', 'storage_path', 'token_hash', 'token_version'):
         result.pop(key, None)
     return result
@@ -229,13 +229,19 @@ def save_document(db, user, filename, content, mapping, demo=False):
     doc = UploadedDocument(organization_id=user.organization_id, uploaded_by=user.id, filename=filename, sha256=hashlib.sha256(content).hexdigest(), storage_path='', demo=demo, mapping=mapping)
     db.add(doc)
     db.flush()
-    root = Path(settings().storage_configuration).resolve()
-    directory = root / user.organization_id
-    directory.mkdir(parents=True, exist_ok=True)
-    path = directory / doc.id
+    path = None
+    if settings().storage_configuration != 'database':
+        root = Path(settings().storage_configuration).resolve()
+        directory = root / user.organization_id
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / doc.id
     try:
-        path.write_bytes(content)
-        doc.storage_path = str(path)
+        if path is not None:
+            path.write_bytes(content)
+            doc.storage_path = str(path)
+        else:
+            doc.source_bytes = content
+            doc.storage_path = 'database'
         periods = {}
         for label in sorted({row['reporting_date'] for row in rows if row.get('reporting_date')}):
             period = db.scalar(select(ReportingPeriod).where(ReportingPeriod.organization_id == user.organization_id, ReportingPeriod.label == label))
@@ -250,7 +256,8 @@ def save_document(db, user, filename, content, mapping, demo=False):
         db.commit()
     except Exception:
         db.rollback()
-        path.unlink(missing_ok=True)
+        if path is not None:
+            path.unlink(missing_ok=True)
         raise
     return {**serialize(doc), 'record_count': len(rows), 'preview': mask_rows(rows[:10])}
 
