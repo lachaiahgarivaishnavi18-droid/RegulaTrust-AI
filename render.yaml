@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: regulatrust-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.lock.txt
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /ready
+    disk:
+      name: regulatrust-private-documents
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.14
+      - key: ENVIRONMENT
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: STORAGE_CONFIGURATION
+        value: /var/data/regulatrust
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        sync: false

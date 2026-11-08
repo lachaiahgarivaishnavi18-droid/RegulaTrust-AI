@@ -1,0 +1,13 @@
+.venv/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+.env
+*.db
+storage/
+*.egg-info/
+coverage/
+.test-tmp/
+*.tsbuildinfo
+.pnpm-store/

@@ -1,0 +1,11 @@
+import { describe,it,expect,vi,afterEach } from 'vitest';
+import { render,screen,fireEvent,cleanup,waitFor } from '@testing-library/react';
+import App,{Badge} from './App';
+
+afterEach(()=>{cleanup();vi.restoreAllMocks();});
+describe('Authentication and evidence interface',()=>{
+ it('shows sign in and enforces registration password length',()=>{render(<App/>);expect(screen.getByRole('heading',{name:'Welcome back'})).toBeInTheDocument();fireEvent.click(screen.getByText('Create an account'));expect(screen.getByRole('heading',{name:'Create your workspace'})).toBeInTheDocument();expect(screen.getByLabelText('Password')).toHaveAttribute('minlength','12');});
+ it('renders authentication failures from the API',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:false,json:async()=>({detail:'Invalid email or password'})}));render(<App/>);fireEvent.change(screen.getByLabelText('Work email'),{target:{value:'user@example.com'}});fireEvent.change(screen.getByLabelText('Password'),{target:{value:'wrong'}});fireEvent.click(screen.getByRole('button',{name:'Sign in'}));expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');});
+ it('connects sign in to database-backed dashboard requests',async()=>{vi.stubGlobal('fetch',vi.fn().mockImplementation(async(url:string)=>({ok:true,json:async()=>url.includes('/auth/login')?{access_token:'test',user:{name:'Test User',roles:['Auditor']}}:url.includes('dashboard/summary')?{reports_processed:2,pending_reviews:1,recent_activity:[]}:url.includes('dashboard/risks')?{score:null,categories:{Critical:0,High:0,Medium:0,Low:0}}:[]})));render(<App/>);fireEvent.change(screen.getByLabelText('Work email'),{target:{value:'test@example.com'}});fireEvent.change(screen.getByLabelText('Password'),{target:{value:'example-password'}});fireEvent.click(screen.getByRole('button',{name:'Sign in'}));expect(await screen.findByRole('heading',{name:'Compliance overview'})).toBeInTheDocument();await waitFor(()=>expect(screen.getByText('No verified regulatory checks yet')).toBeInTheDocument());expect(screen.queryByRole('button',{name:'New upload'})).not.toBeInTheDocument();});
+ it('clearly labels unverified findings for review',()=>{render(<Badge>Needs Review</Badge>);expect(screen.getByText('Needs Review')).toHaveClass('amber');});
+});

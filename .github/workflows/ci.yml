@@ -1,0 +1,36 @@
+name: Application checks
+on: [push, pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: regulatrust_test
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U test" --health-interval 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/regulatrust_test
+      DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/regulatrust_test
+      JWT_SECRET: ci-only-test-secret-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r backend/requirements.txt
+      - run: cd backend && alembic upgrade head && alembic check && pytest -q
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
+      - run: cd frontend && pnpm install --frozen-lockfile && pnpm test && pnpm build
