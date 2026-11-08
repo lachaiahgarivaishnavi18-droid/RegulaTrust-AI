@@ -4,14 +4,23 @@
 - Pushed the tested source to `codex/regulatrust-deployment` (initial source commit `1abf8c5`).
 - Confirmed `.env`, private uploads, local database files, virtual environment, node dependencies and build output are excluded from Git.
 - Inspected signed-in GitHub, Vercel and Render accounts. No existing RegulaTrust resource was identified in the inspected project/service lists. Existing unrelated resources were not changed.
-- User confirmed Neon was connected. Its project tools were not exposed to this chat; the browser console required login/authorization, and temporary console tabs became unavailable before access could be completed.
-- No Neon project, branch, database, schema, production role or credential has been created or modified.
-- No cloud app deployment has been created. No paid resources or upgrades were requested or purchased.
+- Completed Neon Google sign-in and inspected the Vercel-managed organization.
+- Created one isolated Neon database, `regulatrust-db`, on the Free plan in Singapore. Neon project ID: `muddy-moon-75891614`. Vercel storage ID: `store_XMKpQzqeYSPIRRsb`. Auth and Realtime were left disabled.
+- Verified TLS connectivity and an empty database, applied migrations 0001 and 0002, and verified all 22 application tables with no schema drift.
+- Added PostgreSQL storage of uploaded originals (`STORAGE_CONFIGURATION=database`) for stateless hosts. Binary originals are excluded from API serialization. The updated backend suite passed 33 tests; an additional production-configuration check also passed. Frontend build and four component tests passed after adding a configurable upload limit.
+- User authorized the official Vercel CLI via its device sign-in flow. CLI credentials are kept only in the ignored `storage/vercel-cli` directory.
+- Created the exact two required Vercel projects: `regulatrust-api` and `regulatrust-ai`, in the existing Hobby team. No prior projects with those names existed.
+- Configured the API production environment using stdin for secrets: Neon URL, generated JWT secret, HTTPS frontend origin, PostgreSQL private document storage, and a 4 MB request upload limit suitable for Vercel Functions.
+- Prepared clean allowlisted source packages in ignored `storage/deploy/` because Windows denied the CLI access to a test-cache directory. No credentials, uploads, local database files or caches are included.
+- API deployment succeeded: https://regulatrust-api.vercel.app/ (deployment `dpl_CnrFLieaVJS2uxXKjGK3RezV17pQ`, READY). The first API build exposed missing dependencies in `pyproject.toml`; runtime dependency declarations were corrected before the successful release.
+- Frontend deployment succeeded: https://regulatrust-ai.vercel.app/ (deployment `dpl_B4a8Qi9RDYzdaNZS9rhrJxp8jkbw`, READY).
+- The API `/ready` endpoint, live synthetic end-to-end smoke checks and browser login/dashboard all passed. Results are in `cloud-verification.json` and `verification.md`. The synthetic QA browser session was signed out before handoff.
+- No paid resources or upgrades were requested or purchased. Existing unrelated projects were not changed.
 
-## Resume
+## Maintenance
 
-Once Neon project access is available, inspect the intended project and select an isolated RegulaTrust database. Set `DATABASE_URL` securely in backend environment configuration. Do not paste connection secrets in chat or commit them to Git.
+Use the existing database and two Vercel projects; do not create replacement resources for routine releases. Secrets are in Vercel production environment settings and ignored local configuration only. Do not paste connection secrets in chat or commit them to Git.
 
-From `backend/`, run `../.venv/Scripts/python.exe ../scripts/neon_setup.py` for read-only connectivity/schema inspection, then `../.venv/Scripts/python.exe ../scripts/neon_setup.py --apply` to apply the reviewed Alembic migration and verify all 22 application tables. The helper rejects non-Neon hosts, missing TLS and unrelated tables. Its live Neon path is not yet verified; only its refusal of the local development connection has been exercised.
+From `backend/`, run `../.venv/Scripts/python.exe ../scripts/neon_setup.py` for read-only connectivity/schema inspection. The helper's live inspection and `--apply` path were verified successfully. It rejects non-Neon hosts, missing TLS and unrelated tables. Use a new reviewed Alembic revision for future schema changes.
 
-Next configure the frontend/API hosting with the secure Neon URL, JWT secret, exact frontend origin and durable private document storage. Render's current blueprint includes a persistent disk that may require a paid service, so it must not be applied without checking the concrete account cost. Finish by verifying `/ready`, registration, organization isolation, upload, all eight agents, report export, independent review and audit persistence on the actual deployment.
+Production uses `STORAGE_CONFIGURATION=database` and a 4 MB upload cap. The retained Render blueprint is an undeployed alternative that can require a paid disk. Future releases can use `scripts/package_deployment.py` with a new package label and deploy to the same named projects with the authorized CLI. Automatic Git-triggered deployments have not been enabled. Configure SMTP and optional LLM providers separately if those features are needed.

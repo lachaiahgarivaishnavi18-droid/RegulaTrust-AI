@@ -1,6 +1,16 @@
-# Deployment: Vercel + Render + Neon
+# Deployment: Vercel + Neon (Render alternative retained)
 
-No deployment has been created by this implementation session. No cloud credentials were available. Do not treat configuration files as proof of a working deployment.
+The frontend is deployed at https://regulatrust-ai.vercel.app/ and the FastAPI backend at https://regulatrust-api.vercel.app/. Both use the existing Vercel Hobby team. Neon `regulatrust-db` is on the Free plan in Singapore. `/ready` returned 200 with a ready database, and the synthetic cloud smoke workflow passed. No paid upgrade was performed. The retained Render blueprint is an alternative and was not deployed.
+
+## Current Vercel API deployment
+
+The API uses `backend/vercel.json`, Python 3.12, and the FastAPI entrypoint `app.main:app`. Vercel installs the explicitly pinned runtime dependencies in `backend/pyproject.toml`, then runs the Alembic build command. Both schema migrations have been applied to Neon; all 22 application tables and no schema drift were verified.
+
+`STORAGE_CONFIGURATION=database` stores uploaded originals in an organization-scoped PostgreSQL bytea column. Originals are deferred in ORM queries and excluded from API serialization. This supports stateless hosts without a paid persistent disk. Backend secrets were configured through stdin and are not in source control or frontend assets. The production origins are explicitly allowlisted with HTTPS.
+
+The API has `MAX_UPLOAD_BYTES=4194304`, and the frontend has `VITE_MAX_UPLOAD_MB=4`. This leaves room for multipart overhead under Vercel Functions' 4.5 MB request limit. Local installations can retain the 10 MB default. Large-scale processing remains subject to function duration/response limits and the synchronous orchestration limits documented in `architecture.md`.
+
+Releases were deployed using the authorized Vercel CLI from clean allowlisted packages in ignored `storage/deploy/`. The projects are `regulatrust-api` and `regulatrust-ai`. Automatic Git-triggered deployments are not configured; pushing the private source repository alone does not publish a new release. Use the packaging helper and CLI deployment process or deliberately configure Git project roots (`backend` and `frontend`) before enabling automatic releases.
 
 ## Database
 
@@ -20,7 +30,7 @@ Required server variables:
 | `JWT_SECRET` | Cryptographically random secret, at least 32 characters |
 | `ENVIRONMENT` | `production` |
 | `FRONTEND_URL` | Exact HTTPS frontend origin (no trailing slash) |
-| `STORAGE_CONFIGURATION` | Durable private writable directory, e.g. `/var/data/regulatrust` |
+| `STORAGE_CONFIGURATION` | `database` for Neon-backed originals, or a durable private writable directory |
 | `PORT` | Supplied by Render |
 
 Optional narrative provider: `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL` (OpenAI-compatible chat completions interface). Optional password recovery: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`; STARTTLS is required. Missing providers produce clear unavailable responses. No secret is returned by Settings.

@@ -1,6 +1,19 @@
 # Verification record — 8 November 2026
 
+## Verified live deployment
+
+- Frontend: https://regulatrust-ai.vercel.app/
+- FastAPI readiness: https://regulatrust-api.vercel.app/ready (HTTP 200, database ready).
+- Neon Free database `regulatrust-db`, Singapore; migrations 0001/0002 applied, 22 application tables verified with no schema drift.
+- `scripts/cloud_smoke.py` passed registration/login, production CORS, database-backed dashboard, eight completed agents, 96 evidence-backed demo validations, anomaly/risk persistence, CSV/XLSX/PDF uploads, PDF/XLSX exports, self-approval denial, independent reviewer rejection, unverified report approval denial, audit persistence, logout revocation and data persistence across fresh sessions.
+- A direct Neon ORM check confirmed the uploaded CSV original persists in the private binary column and matches its hash. The binary was not exposed in API responses.
+- The deployed frontend was opened in the browser and signed into the synthetic verification workspace. Its dashboard loaded from the live API/Neon database, with no captured console errors. The QA session was signed out before handoff. Screenshot: `docs/screenshots/deployed-dashboard-desktop.jpg`.
+- Machine-readable cloud results: `docs/cloud-verification.json`. All cloud test data is explicitly synthetic.
+- The hosted file upload limit is 4 MB. SMTP recovery delivery and real LLM provider calls remain unconfigured and unverified; the API returns explicit unavailable responses for those optional connections.
+
 ## Passed locally
+
+- **Final updated backend suite: 34 tests passed** using the isolated local test adapter after the hosting/storage changes. The live Neon smoke workflow separately verifies the deployed PostgreSQL path and original-byte persistence.
 
 - **32 backend tests passed** against persistent local PostgreSQL 18.6 using psycopg/SQLAlchemy.
 - **4 frontend component tests passed** using Vitest and Testing Library.
@@ -26,7 +39,7 @@ Synthetic administrator-verified sources in tests are test fixtures only; they a
 | Account creation and login | Passed API and browser checks |
 | Role-based access | Passed administrator, officer, analyst and auditor checks |
 | Database-backed dashboard | Passed API and browser workflow |
-| Supported uploads | CSV API and parser checks; XLSX/PDF parser checks; UI file form implemented |
+| Supported uploads | CSV, XLSX and structured PDF uploads passed on the live API; parser and rejection checks passed locally |
 | Data quality | Passed missing/type/date/duplicate checks |
 | Eight-agent orchestration | Passed success, failure and retry checks |
 | Evidence-backed deterministic validation | Passed source/version/row/hash checks |
@@ -35,14 +48,14 @@ Synthetic administrator-verified sources in tests are test fixtures only; they a
 | PDF/Excel export | Passed all report kind export checks |
 | Human approval | Passed independent approval, rejection, self-review denial and unresolved evidence gates |
 | Persistent audit records | Passed database and API checks |
-| Neon persistence | **Pending Neon connection and live migration verification** |
-| Frontend/backend/database workflow | Passed locally on PostgreSQL |
+| Neon persistence | Passed live migrations, ORM schema check, records/audit persistence and private original-byte verification |
+| Frontend/backend/database workflow | Passed live cloud API checks and deployed browser sign-in/dashboard |
 | Security/integration tests | Passed included tests; independent penetration/security review remains external |
-| Working deployment | **Pending Neon access and hosting setup; no cloud deployment claimed** |
+| Working deployment | Passed: both Vercel deployments are READY and production URLs respond successfully |
 
 ## Material limits and remaining verification
 
-The Neon integration was found and suggested after the user selected Neon. It was not installed/connected at the time this record was written. No Neon database URL, Vercel project or Render service was available. No cloud database migration, hosted frontend/backend workflow, SMTP delivery, real LLM provider call, load test, backup restoration or institution-specific regulatory validation has been verified.
+Neon was provisioned through the existing Vercel-managed organization. The production environment uses Neon and the official Vercel CLI, authorized by the user. SMTP delivery, real LLM provider calls, load testing, backup restoration and institution-specific regulatory validation remain unverified. Render was not deployed; both API and frontend run on Vercel. No paid upgrade was performed.
 
 The frontend build reports a large JavaScript bundle warning (~712 kB minified, ~205 kB gzip). The backend test environment emits a Starlette warning about future migration from its httpx TestClient adapter. Neither prevented successful tests/builds. Current dependencies are locked; upgrade with verification before a production release.
 

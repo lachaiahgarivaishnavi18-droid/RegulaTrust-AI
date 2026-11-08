@@ -11,3 +11,4 @@ coverage/
 .test-tmp/
 *.tsbuildinfo
 .pnpm-store/
+.vercel/

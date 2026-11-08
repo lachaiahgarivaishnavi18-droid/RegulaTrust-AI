@@ -22,6 +22,8 @@ flowchart LR
 
 ## Data and execution
 
+The live deployment uses `STORAGE_CONFIGURATION=database`: uploaded originals persist in Neon in an organization-scoped bytea column. Originals are deferred in ORM reads and excluded from API serialization. Local installations can continue using the private filesystem mode described below.
+
 Each document has an organization, uploader, SHA-256 digest, private path, normalized banking records and reporting periods. Agent runs have unique IDs. All eight execution records are committed before processing. Each stage is visible while running and stores JSON output, software version, attempts, duration, progress and record counts. Pure agents are retried twice without duplicating persisted findings. Result entities and the immutable report snapshot are committed together after all agents succeed. A failure preserves execution history and marks the document failed. Processing uses synchronous HTTP execution; this implementation does not include a distributed task queue or crash recovery for a terminated worker. A worker terminated mid-run can leave `Running` status requiring operator investigation.
 
 Live dashboards select the latest completed run for each document. Historical reports retain their original outcomes and evidence. Report generation creates a new snapshot record linked to its source run; approvals cannot mutate its evidence. PostgreSQL row locking prevents simultaneous reviewer decisions on the same report.

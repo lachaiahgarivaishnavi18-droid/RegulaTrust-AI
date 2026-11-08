@@ -2,7 +2,11 @@
 
 An evidence-led banking reporting workspace with eight modular agents, deterministic validation, organization isolation, independent review, persistent PostgreSQL records and PDF/Excel exports.
 
-**Status:** implemented and tested locally. Neon is the selected production database; its integration still needs installation/connection. Cloud deployment and Neon connectivity are not verified. Included demonstration controls are synthetic and never certify bank compliance.
+**Live app:** https://regulatrust-ai.vercel.app/ · **API:** https://regulatrust-api.vercel.app/ready
+
+**Status:** deployed on Vercel with Neon PostgreSQL. Cloud signup, CSV/XLSX/PDF uploads, eight-agent processing, evidence, anomaly/risk analysis, PDF/Excel exports, independent rejection/approval gates, logout revocation, audit persistence and private document originals were verified with synthetic data. Included demonstration controls never certify bank compliance. Create your account in the live app to start your own isolated workspace.
+
+The hosted upload limit is **4 MB** to fit Vercel Functions. Local installations default to 10 MB. SMTP password recovery and optional LLM narratives still require separately configured providers. See `docs/verification.md` for tested scope and remaining operational requirements.
 
 ## Repository
 
@@ -12,6 +16,9 @@ An evidence-led banking reporting workspace with eight modular agents, determini
 - `backend/tests/` — unit, security, API and database workflow tests.
 - `tools/` — optional persistent workspace-local PostgreSQL runtime for Windows development.
 - `scripts/configure_local.py` — generate ignored `.env` files without overwriting existing files.
+- `scripts/neon_setup.py` — guarded Neon inspection and migration verification.
+- `scripts/package_deployment.py` — package an explicit source allowlist for deployment.
+- `scripts/cloud_smoke.py` — live workflow checks using clearly labeled synthetic data.
 - `docs/architecture.md` — trust boundaries, formulas, assumptions and limitations.
 - `docs/deployment.md` — Vercel / Render / Neon setup and operational requirements.
 - `docs/verification.md` — actual checks run and remaining acceptance gates.

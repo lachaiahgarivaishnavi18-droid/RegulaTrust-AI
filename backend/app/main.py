@@ -270,7 +270,7 @@ def mask_rows(rows):
 async def upload(file: UploadFile = File(...), mapping: str = Form('{}'), user: User = Depends(WRITER), db: Session = Depends(get_db)):
     content = await file.read(settings().max_upload_bytes + 1)
     if len(content) > settings().max_upload_bytes:
-        raise HTTPException(413, 'File exceeds 10 MB limit')
+        raise HTTPException(413, f'File exceeds {settings().max_upload_bytes / (1024 * 1024):g} MB limit')
     filename = (file.filename or '').replace('\\', '/').rsplit('/', 1)[-1]
     if len(filename) > 240 or not filename:
         raise HTTPException(422, 'Invalid filename')

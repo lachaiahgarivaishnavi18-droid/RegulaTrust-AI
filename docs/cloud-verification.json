@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-08",
+  "frontend": "https://regulatrust-ai.vercel.app",
+  "api": "https://regulatrust-api.vercel.app",
+  "synthetic_data_only": true,
+  "checks": {
+    "api_ready": true,
+    "frontend_served": true,
+    "production_cors": true,
+    "authentication": true,
+    "agents_completed": 8,
+    "evidence_backed_demo_validations": 96,
+    "anomaly_and_risk": true,
+    "database_backed_dashboard": true,
+    "pdf_export": true,
+    "xlsx_export": true,
+    "csv_xlsx_pdf_uploads": true,
+    "self_approval_denied": true,
+    "independent_review_and_demo_approval_gate": true,
+    "audit_persistence": true,
+    "logout_revocation_and_persistence": true,
+    "neon_private_original_persistence": true
+  }
+}
