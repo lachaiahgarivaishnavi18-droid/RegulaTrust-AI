@@ -10,7 +10,7 @@ The API uses `backend/vercel.json`, Python 3.12, and the FastAPI entrypoint `app
 
 The API has `MAX_UPLOAD_BYTES=4194304`, and the frontend has `VITE_MAX_UPLOAD_MB=4`. This leaves room for multipart overhead under Vercel Functions' 4.5 MB request limit. Local installations can retain the 10 MB default. Large-scale processing remains subject to function duration/response limits and the synchronous orchestration limits documented in `architecture.md`.
 
-Releases were deployed using the authorized Vercel CLI from clean allowlisted packages in ignored `storage/deploy/`. The projects are `regulatrust-api` and `regulatrust-ai`. Automatic Git-triggered deployments are not configured; pushing the private source repository alone does not publish a new release. Use the packaging helper and CLI deployment process or deliberately configure Git project roots (`backend` and `frontend`) before enabling automatic releases.
+The initial releases were deployed using the authorized Vercel CLI from clean allowlisted packages in ignored `storage/deploy/`. Both existing projects are now connected to `lachaiahgarivaishnavi18-droid/RegulaTrust-AI`, with `main` as the production branch. `regulatrust-api` uses root directory `backend` and the FastAPI framework; `regulatrust-ai` uses root directory `frontend` and Vite. Pushes to `main` automatically trigger the relevant production builds. Vercel can skip an unaffected project in this monorepo. Production environment variables and the existing Neon database remain configured on the same projects.
 
 ## Database
 
